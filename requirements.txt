@@ -10,3 +10,7 @@ jupyter
 joblib
 shap
 streamlit
+xgboost
+lightgbm
+imbalanced-learn
+dice-ml
