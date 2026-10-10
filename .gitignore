@@ -4,3 +4,9 @@ __pycache__/
 .venv/
 venv/
 .env
+# data and model artefacts
+data/raw/
+data/processed/
+models/*.pkl
+models/*.joblib
+.DS_Store

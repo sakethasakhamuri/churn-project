@@ -1,0 +1,12 @@
+# Python dependencies for churn analysis project
+# Update this as you install packages.
+
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+jupyter
+joblib
+shap
+streamlit
