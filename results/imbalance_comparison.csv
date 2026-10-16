@@ -1,0 +1,17 @@
+dataset,model,strategy,precision,recall,f1,roc_auc,pr_auc
+telco,logreg,none,0.653,0.544,0.593,0.846,0.661
+telco,logreg,class_weight,0.517,0.803,0.629,0.846,0.66
+telco,logreg,smote,0.524,0.788,0.629,0.845,0.658
+telco,logreg,undersample,0.514,0.801,0.626,0.846,0.661
+telco,xgb,none,0.659,0.524,0.584,0.844,0.666
+telco,xgb,class_weight,0.533,0.772,0.631,0.845,0.665
+telco,xgb,smote,0.609,0.613,0.611,0.841,0.654
+telco,xgb,undersample,0.509,0.791,0.619,0.84,0.646
+bank,logreg,none,0.597,0.214,0.315,0.763,0.469
+bank,logreg,class_weight,0.38,0.685,0.488,0.766,0.457
+bank,logreg,smote,0.383,0.681,0.49,0.766,0.456
+bank,logreg,undersample,0.38,0.683,0.488,0.765,0.454
+bank,xgb,none,0.753,0.478,0.585,0.865,0.701
+bank,xgb,class_weight,0.527,0.728,0.611,0.864,0.698
+bank,xgb,smote,0.655,0.578,0.614,0.862,0.692
+bank,xgb,undersample,0.483,0.756,0.589,0.858,0.682

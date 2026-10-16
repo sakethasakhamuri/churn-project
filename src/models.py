@@ -5,6 +5,9 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
+from imblearn.pipeline import Pipeline as ImbPipeline
+from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import RandomUnderSampler
 
 def make_preprocessor(X):
     num_cols = X.select_dtypes(include="number").columns.tolist()
@@ -37,3 +40,22 @@ def make_xgb(X, scale_pos_weight=1):
                                 scale_pos_weight=scale_pos_weight,
                                 eval_metric="logloss", random_state=42, n_jobs=-1)),
     ])
+
+def make_balanced(kind, X, y, strategy):
+    """kind: 'logreg' or 'xgb'.  strategy: 'none', 'class_weight', 'smote', 'undersample'."""
+    ratio = (y == 0).sum() / (y == 1).sum()
+    if kind == "logreg":
+        clf = LogisticRegression(max_iter=1000,
+                                 class_weight="balanced" if strategy == "class_weight" else None)
+    else:
+        clf = XGBClassifier(n_estimators=300, learning_rate=0.05, max_depth=4,
+                            subsample=0.8, colsample_bytree=0.8,
+                            scale_pos_weight=ratio if strategy == "class_weight" else 1,
+                            eval_metric="logloss", random_state=42, n_jobs=-1)
+    steps = [("prep", make_preprocessor(X))]
+    if strategy == "smote":
+        steps.append(("resample", SMOTE(random_state=42)))
+    if strategy == "undersample":
+        steps.append(("resample", RandomUnderSampler(random_state=42)))
+    steps.append(("model", clf))
+    return ImbPipeline(steps)

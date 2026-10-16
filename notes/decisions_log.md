@@ -47,3 +47,43 @@ Decision 5: Raw data never edited
 Cleaning happens in code and writes to data/processed/. This keeps the work reproducible.
 
 Facts to record: Telco 7,043 rows, 26.5% churn. Bank 10,000 rows, 20.4% churn, no missing values or duplicates in either file after cleaning.
+
+## Train/test split
+- Decision: 80/20 stratified split, random_state=42, done before any modelling.
+- Why: a held-out test set gives an honest score on customers the model has never
+  seen. Stratifying keeps the churn rate the same in both parts (Telco 26.5%,
+  Bank 20.4%).
+- Rule: the test set is not used until final evaluation. Model choices are made
+  with 5-fold cross-validation on the training data only.
+
+## Main metric
+- Decision: PR-AUC is the main metric, alongside precision, recall, F1, ROC-AUC.
+- Why: churn is the minority class, so accuracy is misleading (Bank: always
+  guessing "stays" scores 79.6% accuracy). PR-AUC focuses on how well the model
+  finds the leavers.
+
+## Model comparison (5-fold CV on training data)
+- Models: Logistic Regression (baseline), Random Forest, XGBoost.
+- Telco: all three tied (PR-AUC 0.661 / 0.659 / 0.666). Simple relationships
+  (contract, tenure), so a complex model adds little.
+- Bank: tree models clearly better (PR-AUC LogReg 0.469, Random Forest 0.684,
+  XGBoost 0.701). Consistent with EDA: churn rises then falls with age and
+  depends non-linearly on number of products, which a straight-line model
+  cannot capture.
+- XGBoost is best or tied-best on both datasets, so it is the lead candidate.
+
+## Imbalance handling
+- Tried: class weights, SMOTE, random undersampling, each applied only inside the
+  training part of each CV fold (imblearn pipeline) to avoid leakage.
+- Result: recall rose a lot (Bank XGBoost 0.478 -> 0.756 with undersampling) but
+  precision fell (0.753 -> 0.483). ROC-AUC and PR-AUC stayed about the same, and
+  undersampling slightly lowered PR-AUC. So these methods mostly shift the
+  decision threshold rather than improve how well the model ranks customers.
+
+## Model carried forward
+- Decision: carry forward XGBoost without resampling or class weights, and choose
+  the decision threshold using the cost-benefit matrix.
+- Why: class weights and resampling distort the predicted probabilities, and the
+  cost calculation needs honest probabilities (expected cost = probability x cost).
+- Plan: keep class-weighted and SMOTE versions as comparison rows in the report.
+- Limitation: differences of about 0.005 in PR-AUC are within CV noise.
