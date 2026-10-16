@@ -1,0 +1,7 @@
+dataset,model,precision,recall,f1,roc_auc,pr_auc
+telco,LogReg,0.653,0.544,0.593,0.846,0.661
+telco,RandomForest,0.668,0.496,0.569,0.845,0.659
+telco,XGBoost,0.659,0.524,0.584,0.844,0.666
+bank,LogReg,0.597,0.214,0.315,0.763,0.469
+bank,RandomForest,0.785,0.446,0.569,0.859,0.684
+bank,XGBoost,0.753,0.478,0.585,0.865,0.701
