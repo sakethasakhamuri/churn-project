@@ -87,3 +87,28 @@ Facts to record: Telco 7,043 rows, 26.5% churn. Bank 10,000 rows, 20.4% churn, n
   cost calculation needs honest probabilities (expected cost = probability x cost).
 - Plan: keep class-weighted and SMOTE versions as comparison rows in the report.
 - Limitation: differences of about 0.005 in PR-AUC are within CV noise.
+
+## Cost-benefit assumptions (labelled assumptions, no real campaign data)
+- Telco: V = 777 (12 x mean monthly charge 64.76), offer cost = 78 (10% of V),
+  offer success rate s = 30%.
+- Bank: illustrative units V = 1000, offer = 100, s = 30%. EstimatedSalary not used
+  (uncorrelated with all other columns in EDA).
+- Cost per outcome: TP = offer + (1-s)V; FP = offer; FN = V; TN = 0.
+- Break-even threshold = offer / (s x V) ~ 0.33.
+
+## Cost-optimal threshold (out-of-fold XGBoost probabilities, unweighted)
+- Telco 0.36 (188.1 per customer), bank 0.32 (185.7). At 0.5: 190.2 / 187.4.
+  Flag nobody: 206.2 / 203.8. Flag everybody: 222.3 / 242.6.
+- Saving vs flag nobody about 8.8% on both; vs threshold 0.5 about 1%.
+- Cost curves are flat near the minimum (about 0.25-0.45), so the exact threshold
+  is not critical.
+
+## Sensitivity analysis
+- Varied success rate (10-50%) and offer cost (5-20% of V).
+- Best threshold is close to offer/(s x V); ranges from 0.05 to 0.95.
+- Saving vs flag nobody ranges from 0% (offers costly or ineffective, ratio >= 1)
+  to about 35% (cheap, effective offers).
+- Conclusion: the value of the model depends on the real success rate of retention
+  offers, which should be measured with a pilot.
+- Limitation: Telco and bank use the same cost ratios, so their similarity is by
+  construction.

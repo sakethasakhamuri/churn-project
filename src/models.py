@@ -8,6 +8,8 @@ from xgboost import XGBClassifier
 from imblearn.pipeline import Pipeline as ImbPipeline
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
+from lightgbm import LGBMClassifier
+from sklearn.svm import SVC
 
 def make_preprocessor(X):
     num_cols = X.select_dtypes(include="number").columns.tolist()
@@ -59,3 +61,17 @@ def make_balanced(kind, X, y, strategy):
         steps.append(("resample", RandomUnderSampler(random_state=42)))
     steps.append(("model", clf))
     return ImbPipeline(steps)
+
+def make_lgbm(X):
+    return Pipeline([
+        ("prep", make_preprocessor(X)),
+        ("model", LGBMClassifier(n_estimators=300, learning_rate=0.05, num_leaves=15,
+                                 subsample=0.8, subsample_freq=1, colsample_bytree=0.8,
+                                 random_state=42, n_jobs=-1, verbose=-1)),
+    ])
+
+def make_svm(X):
+    return Pipeline([
+        ("prep", make_preprocessor(X)),
+        ("model", SVC(kernel="rbf", C=1.0, gamma="scale")),
+    ])
