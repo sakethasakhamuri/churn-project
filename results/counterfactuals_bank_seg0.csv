@@ -1,0 +1,4 @@
+CreditScore,Geography,Gender,Age,Tenure,Balance,NumOfProducts,HasCrCard,IsActiveMember,EstimatedSalary
+646,France,Female,51,4,101629.3,1,1,1,130541.1
+646,France,Female,51,4,101629.3,2,0,1,130541.1
+646,France,Female,51,4,101629.3,1,1,1,130541.1

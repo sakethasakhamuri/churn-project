@@ -1,0 +1,4 @@
+CreditScore,Geography,Gender,Age,Tenure,Balance,NumOfProducts,HasCrCard,IsActiveMember,EstimatedSalary
+673,Germany,Female,34,1,127122.79,2,0,0,76703.1
+673,Germany,Female,34,1,127122.79,1,0,1,76703.1
+673,Germany,Female,34,1,127122.79,2,0,1,76703.1

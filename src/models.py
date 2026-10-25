@@ -75,3 +75,9 @@ def make_svm(X):
         ("prep", make_preprocessor(X)),
         ("model", SVC(kernel="rbf", C=1.0, gamma="scale")),
     ])
+
+def make_xgb_tuned(X, params):
+    base = dict(n_estimators=300, learning_rate=0.05, max_depth=4, subsample=0.8,
+                colsample_bytree=0.8, eval_metric="logloss", random_state=42, n_jobs=-1)
+    base.update(params)
+    return Pipeline([("prep", make_preprocessor(X)), ("model", XGBClassifier(**base))])

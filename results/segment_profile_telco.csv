@@ -1,0 +1,7 @@
+shap_segment,size,churn,SeniorCitizen,tenure,MonthlyCharges,TotalCharges,gender,Partner,Dependents,PhoneService,MultipleLines,InternetService,OnlineSecurity,OnlineBackup,DeviceProtection,TechSupport,StreamingTV,StreamingMovies,Contract,PaperlessBilling,PaymentMethod
+0,943,0.243,0.06,10.78,37.75,449.51,Female (50%),No (70%),No (72%),Yes (85%),No (85%),DSL (55%),No (81%),No (84%),No (88%),No (82%),No (85%),No (86%),Month-to-month (100%),No (55%),Mailed check (47%)
+1,1067,0.017,0.05,43.4,37.52,1805.45,Male (51%),Yes (60%),No (52%),Yes (92%),No (68%),No (67%),No (78%),No (80%),No (78%),No (75%),No (80%),No (80%),Two year (75%),No (65%),Mailed check (36%)
+2,1225,0.384,0.31,34.46,83.18,2898.2,Male (52%),No (50%),No (79%),Yes (92%),Yes (61%),Fiber optic (81%),No (76%),No (56%),No (60%),No (78%),Yes (50%),Yes (51%),Month-to-month (100%),Yes (77%),Electronic check (54%)
+3,523,0.046,0.14,69.33,84.44,5839.01,Female (52%),Yes (81%),No (59%),Yes (90%),Yes (73%),Fiber optic (50%),Yes (66%),Yes (71%),Yes (74%),Yes (68%),Yes (69%),Yes (71%),Two year (95%),Yes (60%),Bank transfer (automatic) (41%)
+4,934,0.671,0.23,4.14,73.63,333.05,Female (51%),No (77%),No (88%),Yes (93%),No (68%),Fiber optic (77%),No (89%),No (81%),No (82%),No (90%),No (68%),No (69%),Month-to-month (100%),Yes (74%),Electronic check (64%)
+5,942,0.135,0.16,46.94,79.99,3916.11,Male (51%),Yes (58%),No (66%),Yes (87%),Yes (52%),Fiber optic (50%),No (51%),Yes (56%),Yes (59%),Yes (52%),Yes (60%),Yes (61%),One year (93%),Yes (62%),Credit card (automatic) (29%)
