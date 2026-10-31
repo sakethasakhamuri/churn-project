@@ -140,3 +140,14 @@
   experience of multi-product customers, not as a recommendation to remove products.
 - Limitations: "becoming active" is an outcome that needs its own actions; only four customers
   were analysed in detail; the results are associations learned by the model.
+
+## 15. Literature review method
+- Searched for sources on churn prediction (telecom and banking), class imbalance and
+  metrics, cost-sensitive evaluation, SHAP, counterfactual explanations, and segmentation
+  with explanations. Each reference's title, authors, venue, year, pages and DOI were
+  checked against publisher, arXiv or index pages before inclusion; 11 references retained.
+- Closest prior work: El Attar and El-Hajj (2026), SHAP with autoencoder-based segmentation
+  on telecom data; Lundberg et al. (2020), combining local explanations to find subgroups.
+- Novelty claim is limited to the combination (out-of-fold SHAP clustering, comparison with
+  raw-feature clustering, link to cost-optimal thresholds and counterfactuals, validation on
+  telecom and banking data) and reflects a limited search, not an exhaustive review.
