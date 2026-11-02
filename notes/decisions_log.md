@@ -90,6 +90,12 @@
 - Telco: silhouettes low (0.23-0.26), weak cluster structure. Rule gives k = 3; chose
   k = 6 for more granular retention actions (differences among k = 3-6 are small),
   with k = 3 checked as a sensitivity run.
+- Sensitivity run for Telco with k = 3: segments of 2,335 / 1,581 / 1,718 customers with
+  churn of 5.7% / 44.0% / 38.9% (spread 0.383 vs 0.654 for k = 6; ARI between the two
+  groupings 0.457). k = 3 puts the new, very high-risk customers (67% churn in k = 6) in the
+  same group as longer-tenure customers at about 38-44%, so k = 6 is retained for its finer
+  separation of risk and retention actions. Because silhouette is low (about 0.23-0.26), the
+  segments are a practical partition of a continuum, not sharply separated natural clusters.
 
 ## 12. SHAP-based segments and retention mapping
 - Telco k = 6: churn 1.7% to 67.1%; riskiest are new month-to-month fiber customers
@@ -151,3 +157,30 @@
 - Novelty claim is limited to the combination (out-of-fold SHAP clustering, comparison with
   raw-feature clustering, link to cost-optimal thresholds and counterfactuals, validation on
   telecom and banking data) and reflects a limited search, not an exhaustive review.
+
+## 16. Guide feedback and scope extension
+- Guide reviewed the methodology and results and recommended four additions: (1) CatBoost
+  and EBM in the model comparison, (2) survival analysis on Telco (Cox, Random Survival
+  Forest, XGBoost-AFT; concordance index and integrated Brier score; customer-specific
+  lifetime value in place of the fixed value V = 777 in the cost matrix), (3) error analysis
+  of false negatives, (4) a Streamlit demo.
+- Survival design notes: tenure is the time variable and churn the event (non-churners are
+  right-censored); tenure and TotalCharges are removed from the predictors because
+  TotalCharges is a function of tenure; customers with tenure 0 need a small positive time.
+- DeepSurv is optional because it requires PyTorch.
+
+## 17. Error analysis: false negatives (Telco, out-of-fold, threshold 0.36)
+- Of 1,495 churners in the training data, the model caught 1,030 (recall 0.689) and missed 465.
+- Misses are concentrated outside the highest-risk segment: segment 4 (new month-to-month
+  fiber customers) is almost fully caught (1.1% missed), while 32.6% of churners in segment 2,
+  62.9% in segment 0 and 93.7% in segment 5 are missed. Segments 1 and 3 have very few
+  churners (18 and 24), so their 100% miss rates are not reliable.
+- Missed churners are long-tenure customers (mean 32.6 months vs 11.9 for caught churners),
+  with slightly lower monthly charges, and 93.8% of one-year-contract churners are missed
+  (22.9% of month-to-month churners).
+- The mean predicted probability of missed churners is 0.19, well below the threshold, so
+  lowering the threshold would not recover them cheaply; the features available do not
+  identify them.
+- Hypothesis (to be tested): long-tenure one-year-contract churners leave at contract renewal,
+  which the data cannot show because it has no contract end date. Recommended: add renewal
+  dates, complaint and usage data, and use timing (survival) models.
