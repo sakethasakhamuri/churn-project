@@ -181,6 +181,48 @@
 - The mean predicted probability of missed churners is 0.19, well below the threshold, so
   lowering the threshold would not recover them cheaply; the features available do not
   identify them.
-- Hypothesis (to be tested): long-tenure one-year-contract churners leave at contract renewal,
-  which the data cannot show because it has no contract end date. Recommended: add renewal
-  dates, complaint and usage data, and use timing (survival) models.
+- Hypothesis tested: that long-tenure one-year-contract churners leave at contract renewal.
+  Their tenures were not concentrated near multiples of 12 months (20.8% within one month of
+  a multiple of 12, against about 25% expected by chance; n = 130; two-year churners 33.3%,
+  n = 39, inflated by the dataset's tenure cap at 72). The test is inconclusive, because the
+  data holds the current contract, not its start date, so tenure is not time since contract
+  start. Conclusion: no evidence of a renewal effect; the data cannot answer the question.
+- Recommended: collect contract start and end dates, complaint and usage data, and use
+  time-to-event (survival) models.
+- Bank (out-of-fold, threshold 0.32): of 1,630 churners the model caught 1,036 (recall 0.636)
+  and missed 594.
+- Bank misses are concentrated in two segments: segment 1 (144 churners, 97.9% missed) and
+  segment 3 (485 churners, 68.2% missed); segments 0 and 2 are mostly caught (14.8% and 2.7%
+  missed).
+- Missed bank churners are younger (mean age 38.6 vs 48.3 for caught churners), more often
+  active members (0.51 vs 0.28), and hold fewer products (1.35 vs 1.54). Their mean predicted
+  probability is 0.15 (caught: 0.70). Misses are higher in France (44.3%) and Spain (45.2%)
+  than in Germany (24.6%), and slightly higher for men (40.9%) than for women (32.9%).
+- Reading: in both datasets, missed churners look like loyal customers (long tenure in Telco;
+  young and active in the bank), with predicted probabilities far below the threshold, so the
+  available features cannot identify them. Lowering the threshold would not recover them cheaply.
+  A real company would need additional data (complaints, usage trends, contract dates) or a
+  separate low-cost, broad retention measure for these groups.
+- Limitation: the miss rates for the gender and geography groups are associations, not evidence
+  of unfair treatment; a formal fairness check was not carried out.
+
+## 18. Adding CatBoost and EBM to the model comparison (5-fold CV on training data)
+- Added as requested by the guide. CatBoost: 300 iterations, learning rate 0.05, depth 4, same
+  preprocessing as the other models. EBM (Explainable Boosting Machine, a glass-box additive
+  model): default settings on the raw table, random_state 42.
+- PR-AUC, Telco: EBM 0.672, CatBoost 0.667, XGBoost 0.666. Bank: CatBoost 0.711, XGBoost 0.701,
+  EBM 0.701, LightGBM 0.702.
+- Rule set in advance: XGBoost remains the lead model unless another model beats it by more than
+  0.01 PR-AUC on both datasets. The largest gains are +0.006 (Telco, EBM) and +0.010 (bank,
+  CatBoost, exactly at the margin), and no model passes on both datasets, so XGBoost is kept.
+  This also keeps the SHAP, segmentation and DiCE results valid, as they were built on XGBoost.
+- EBM matches XGBoost on both datasets while being directly interpretable, which supports the
+  conclusion that the churn signal is mostly additive and that complex models add little.
+- Results saved in results/model_comparison_all.csv.
+
+## 19. Guide's priorities (reply of 2 Nov)
+- Model comparison and error analysis are the prime items; survival analysis is the second
+  priority ("extension"); the Streamlit app is for the demo. Review dates, viva date and report
+  template are still to be communicated by the guide.
+- Consequence: the report presents model comparison and error analysis in the main results;
+  survival analysis is written as an extension chapter; Streamlit is shown at the viva.

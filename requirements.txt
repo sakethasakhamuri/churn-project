@@ -14,3 +14,7 @@ xgboost
 lightgbm
 imbalanced-learn
 dice-ml
+catboost
+interpret
+lifelines
+scikit-survival

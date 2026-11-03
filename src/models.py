@@ -10,6 +10,8 @@ from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
 from lightgbm import LGBMClassifier
 from sklearn.svm import SVC
+from catboost import CatBoostClassifier
+from interpret.glassbox import ExplainableBoostingClassifier
 
 def make_preprocessor(X):
     num_cols = X.select_dtypes(include="number").columns.tolist()
@@ -81,3 +83,13 @@ def make_xgb_tuned(X, params):
                 colsample_bytree=0.8, eval_metric="logloss", random_state=42, n_jobs=-1)
     base.update(params)
     return Pipeline([("prep", make_preprocessor(X)), ("model", XGBClassifier(**base))])
+
+
+def make_catboost(X):
+    return Pipeline([("prep", make_preprocessor(X)),
+                     ("model", CatBoostClassifier(iterations=300, learning_rate=0.05, depth=4,
+                                                  random_seed=42, verbose=0))])
+
+def make_ebm(X):
+    # EBM handles text categories natively, so it gets the raw table with no preprocessing
+    return ExplainableBoostingClassifier(random_state=42)
