@@ -133,12 +133,20 @@
 ## 14. Counterfactual results (DiCE)
 - First Telco run allowed the monthly charge to vary freely (18-120), producing unrealistic
   price cuts of 50-77% and a price increase. The final run limits it to at most a 20% discount.
-- Telco, segment 4 (customer 5037, risk 0.70, new fiber customer): a one-year contract alone
-  flips the prediction; a two-year contract with a discount of about 19% also works.
-- Telco, segment 2 (customer 5750, risk 0.51, established month-to-month fiber customer):
-  one-year contract with automatic credit-card payment; or a two-year contract with a discount
-  of about 9%.
-- Main lever in Telco: contract commitment, consistent with SHAP (contract is the top driver)
+- Telco, segment 4 (customer 5037, risk 0.70, new fiber customer, month-to-month): in the saved
+  run the options are a two-year contract with the streaming TV service switched off, a one-year
+  contract with automatic credit-card payment, and a two-year contract with a small discount
+  (about 2%). An earlier run of the same search also found a one-year contract alone and a
+  two-year contract with a discount of about 19%.
+- Telco, segment 2 (customer 5750, risk 0.51, established month-to-month fiber customer): in the
+  saved run all three options switch to a one-year contract, combined with added tech support,
+  added streaming movies, or a discount of about 13%. An earlier run found a two-year contract
+  with a discount of about 9% and a one-year contract with automatic credit-card payment.
+- The options differ between runs because DiCE's random search is not seeded; options that
+  switch a service off (such as streaming TV) are model artefacts, not recommendations. What is
+  stable across runs is the contract: every Telco option moves the customer to a one- or two-year
+  contract.
+- Main lever in Telco (stable across both runs): contract commitment, consistent with SHAP (contract is the top driver)
   and EDA (month-to-month churn 42.7%). Automatic payment is a secondary lever.
 - Bank, segment 0 (customer 5341, 1 product, inactive, risk 0.63): becoming an active member,
   with a credit card or a second product. Bank segment 2 (customer 2210, 3 products, risk
