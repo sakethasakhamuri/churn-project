@@ -133,25 +133,26 @@
 ## 14. Counterfactual results (DiCE)
 - First Telco run allowed the monthly charge to vary freely (18-120), producing unrealistic
   price cuts of 50-77% and a price increase. The final run limits it to at most a 20% discount.
-- Telco, segment 4 (customer 5037, risk 0.70, new fiber customer, month-to-month): in the saved
-  run the options are a two-year contract with the streaming TV service switched off, a one-year
-  contract with automatic credit-card payment, and a two-year contract with a small discount
-  (about 2%). An earlier run of the same search also found a one-year contract alone and a
-  two-year contract with a discount of about 19%.
-- Telco, segment 2 (customer 5750, risk 0.51, established month-to-month fiber customer): in the
-  saved run all three options switch to a one-year contract, combined with added tech support,
-  added streaming movies, or a discount of about 13%. An earlier run found a two-year contract
-  with a discount of about 9% and a one-year contract with automatic credit-card payment.
-- The options differ between runs because DiCE's random search is not seeded; options that
-  switch a service off (such as streaming TV) are model artefacts, not recommendations. What is
-  stable across runs is the contract: every Telco option moves the customer to a one- or two-year
-  contract.
-- Main lever in Telco (stable across both runs): contract commitment, consistent with SHAP (contract is the top driver)
-  and EDA (month-to-month churn 42.7%). Automatic payment is a secondary lever.
+- Seeding: the DiCE call with random_seed failed to find options for bank segment 0 for any seed,
+  so Python's and NumPy's global generators are seeded instead (seed 42; the first seed in 42-61 that
+  finds options is used, which was 42 for all four customers). Two consecutive runs gave identical
+  options. The options below are the saved, repeatable run. Earlier unseeded runs gave different
+  add-ons and discounts (for example a two-year contract with a discount of about 19%).
+- Telco, segment 4 (customer 5037, risk 0.70, new fiber customer, month-to-month): a two-year
+  contract with device protection added, a one-year contract with online security added, and a
+  two-year contract with online backup added.
+- Telco, segment 2 (customer 5750, risk 0.51, established month-to-month fiber customer): a
+  two-year contract with a discount of about 12% (61.64 against 70.15), a two-year contract with
+  a discount of about 2% (68.76), and a one-year contract with online backup added.
+- What is stable across seeds and runs is the contract: every Telco option moves the customer to a
+  one- or two-year contract. Options that switch a service off are model artefacts, not
+  recommendations.
+- Main lever in Telco: contract commitment, consistent with SHAP (contract is the top driver)
+  and EDA (month-to-month churn 42.7%). Add-ons and discounts are secondary and vary by seed.
 - Bank, segment 0 (customer 5341, 1 product, inactive, risk 0.63): becoming an active member,
-  with a credit card or a second product. Bank segment 2 (customer 2210, 3 products, risk
-  0.95): reducing to 1-2 products flips the prediction. This is read as a signal about the
-  experience of multi-product customers, not as a recommendation to remove products.
+  combined with a second product, a credit card, or both. Bank segment 2 (customer 2210, 3
+  products, risk 0.95): reducing to 1-2 products flips the prediction. This is read as a signal
+  about the experience of multi-product customers, not as a recommendation to remove products.
 - Limitations: "becoming active" is an outcome that needs its own actions; only four customers
   were analysed in detail; the results are associations learned by the model.
 
@@ -293,3 +294,35 @@
   all training data, whereas the segments were built from out-of-fold SHAP values; the offer cost
   and success rate are assumptions; counterfactuals show what the model responds to, not what a
   real customer will do.
+
+## 23. Remaining optional items (run on 8 Nov; notebook 10_extensions.ipynb, counterfactual seeding in 06)
+- Cox proportional-hazards test (lifelines, rank time transform, ridge 0.1, Telco): 9 of 21
+  features have p < 0.05; after Bonferroni (0.05/21 = 0.0024) Contract_Two year (p < 0.0001) and
+  MultipleLines (0.0004) remain; StreamingMovies (0.0023) just passes. The assumption is only
+  approximately met. RSF and XGBoost-AFT, which do not assume it, score within 0.015 concordance
+  index, so the model comparison is not sensitive to it; V_i (built on Cox curves) is treated as
+  an approximation.
+- Group check on out-of-fold XGBoost predictions at the cost-optimal threshold. Flag rate, recall,
+  false-alarm rate: bank women 0.271, 0.671, 0.137 vs men 0.157, 0.591, 0.071; Germany 0.394,
+  0.754, 0.215 vs France 0.143, 0.557, 0.065 and Spain 0.152, 0.548, 0.074; Telco seniors 0.536,
+  0.810, 0.345 vs 0.272, 0.648, 0.155; Telco gender balanced (recall 0.690 vs 0.688, false alarms
+  0.180 vs 0.179). Flag rates follow group churn rates, and higher-churn groups get about two to
+  three times more false alarms (unnecessary offers).
+- Mitigation test: XGBoost retrained without the sensitive attributes (Telco gender, SeniorCitizen;
+  bank Gender, Geography), out-of-fold, each model at its own cost-optimal threshold. PR-AUC / cost
+  (nobody): Telco 0.663 / 188.1 -> 0.660 / 188.3 (206.2); bank 0.701 / 185.7 -> 0.665 / 187.5
+  (203.8). Telco: senior gap remains (false alarms 0.369 vs 0.193, proxies). Bank: false-alarm gaps
+  close (Germany 0.215 -> 0.097 vs France 0.086, Spain 0.104; women 0.137 -> 0.095 vs men 0.091)
+  but recall of the highest-churn groups falls (Germany 0.754 -> 0.578; women 0.671 -> 0.571).
+  Fairness-accuracy trade-off; whether to use the attributes is a policy decision. Not done: other
+  fairness methods such as group-specific thresholds.
+- LIME vs SHAP on 100 flagged customers per dataset (top-5 overlap on one-hot columns): Telco mean
+  0.662, 89% of customers with overlap >= 0.6; bank 0.732, 96%. Broad agreement; exact matches not
+  expected (LIME is a local linear approximation, TreeSHAP exact).
+- DeepSurv (PyTorch, two hidden layers of 32, dropout 0.1, weight decay 0.001, 200 epochs, full-batch,
+  untuned, same 5-fold CV, tenure and TotalCharges removed): C-index 0.868 (sd 0.004), level with Cox
+  0.867, AFT 0.865, RSF 0.852. A neural network adds nothing over Cox here. Integrated Brier score
+  0.083 (sd 0.003; Breslow baseline hazard from each training fold), level with Cox 0.084 and AFT 0.082.
+- Counterfactual seeding: see entry 14 (options now repeat between runs).
+- Demo: app/streamlit_app.py now seeds the DiCE search (seed 42), so a customer gets the same options each time.
+- Still not done by choice: Cox assumption fixes (stratification or time-varying effects).

@@ -3,6 +3,7 @@
     python app/build_app_artifacts.py      (once)
     streamlit run app/streamlit_app.py
 """
+import random
 import sys
 from pathlib import Path
 
@@ -184,6 +185,7 @@ elif st.button("Generate counterfactual options"):
         rng = {"NumOfProducts": ["1", "2", "3", "4"]}
     try:
         with st.spinner("Searching for options..."):
+            random.seed(42); np.random.seed(42)         # fixed seed: the same customer gives the same options
             cf = dice_explainer(name).generate_counterfactuals(
                 q, total_CFs=8, desired_class="opposite", features_to_vary=VARY[name], permitted_range=rng)
         cfdf = cf.cf_examples_list[0].final_cfs_df.drop(columns="churn")

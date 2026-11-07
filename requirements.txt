@@ -18,3 +18,5 @@ catboost
 interpret
 lifelines
 scikit-survival
+lime
+torch

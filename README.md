@@ -29,7 +29,7 @@ used so the framework is checked in two domains: telecom (Telco) and banking.
 - `data/raw/` original Kaggle files (not committed); `data/processed/` cleaned data (not committed)
 - `notebooks/` run in order:
   `01_data_cleaning`, `02_eda`, `03_modelling`, `04_explainability_shap`, `05_segmentation`,
-  `06_counterfactuals`, `07_error_analysis`, `08_survival`, `09_report_figures`
+  `06_counterfactuals`, `07_error_analysis`, `08_survival`, `09_report_figures`, `10_extensions` (proportional-hazards test, group check, LIME, DeepSurv)
 - `src/` reusable code shared by both datasets
   (`data`, `models`, `evaluate`, `explain`, `segment`, `survival`)
 - `app/` Streamlit demo (`build_app_artifacts.py`, `streamlit_app.py`)
@@ -49,8 +49,8 @@ python -m venv .venv
 .venv\Scripts\activate            # Windows (Mac/Linux: source .venv/bin/activate)
 pip install -r requirements.txt
 ```
-Select the `.venv` kernel in Jupyter or VS Code, then run notebooks 01 to 09 in order
-(Restart and Run All in each). Fixed seeds (42) are used throughout; the train/test split is
+Select the `.venv` kernel in Jupyter or VS Code, then run notebooks 01 to 10 in order
+(Restart and Run All in each). Fixed seeds (42) are used throughout, including the DiCE counterfactual search; the train/test split is
 80/20 stratified and the test set is used once, for the final evaluation.
 
 ## Running the demo
@@ -72,7 +72,14 @@ second opens the demo in the browser. Demo screenshots are in `figures/`.
   0.654 vs 0.498, bank 0.808 vs 0.191).
 - Survival (Telco): concordance index Cox 0.867, XGBoost-AFT 0.865, RSF 0.852; integrated Brier
   score 0.082-0.092 against 0.175 with no features. A customer-specific rule saves 9.4%, against
-  8.7% for the best single threshold.
+  8.7% for the best single threshold. DeepSurv (a neural Cox model) scores 0.868 / 0.083, level
+  with Cox, so it adds nothing.
+- Extra checks (`notebooks/10_extensions`): the Cox proportional-hazards assumption holds only
+  approximately (9 of 21 features reject it, 2 after Bonferroni correction); LIME broadly agrees
+  with SHAP (3.3 to 3.7 of the top 5 features in common); false-alarm rates are higher for
+  higher-churn groups (bank women and Germany, Telco senior citizens). Retraining without the
+  sensitive attributes narrows the bank gaps at some cost in accuracy (PR-AUC 0.701 to 0.665) and
+  does not remove the Telco senior-citizen gap.
 
 ## Limitations
 No real campaign data exists, so the cost figures (offer cost, success rate, customer value for
