@@ -10,3 +10,5 @@ data/processed/
 models/*.pkl
 models/*.joblib
 .DS_Store
+catboost_info/
+.streamlit/

@@ -226,3 +226,62 @@
   template are still to be communicated by the guide.
 - Consequence: the report presents model comparison and error analysis in the main results;
   survival analysis is written as an extension chapter; Streamlit is shown at the viva.
+
+## 20. Survival analysis on Telco (extension; 5-fold CV on training data)
+- Setup: time = tenure in months (the 8 training customers with tenure 0 were given 0.5 months),
+  event = churn, non-churners are right-censored. Tenure and TotalCharges were removed from the
+  predictors, since tenure is now the time variable and TotalCharges is roughly tenure times
+  monthly charge. 17 predictors remain; 1,495 events among 5,634 training customers; median time
+  to churn among churners 10 months; maximum observed time 72 (the dataset's cap).
+- Models: Cox proportional hazards (ridge penalty 0.1), Random Survival Forest (200 trees,
+  minimum leaf 15), XGBoost-AFT (normal distribution, scale 1.2, 300 rounds, depth 3). DeepSurv
+  was not run (requires PyTorch; optional in the guide's request).
+- Concordance index: Cox 0.867 (sd 0.003), XGBoost-AFT 0.865 (0.004), RSF 0.852 (0.004).
+  Cox and AFT are tied within fold-to-fold variation; RSF is slightly lower. As in the
+  classification comparison, the simple model matches the complex ones.
+- Integrated Brier score (months 3-60; lower is better): no features (Kaplan-Meier) 0.175,
+  Cox 0.084, RSF 0.092, XGBoost-AFT 0.082. All three models roughly halve the error of the
+  no-features baseline.
+- Limitations: the proportional-hazards assumption of the Cox model was not tested; the AFT
+  survival curve assumes a normal distribution of log lifetime with a fixed scale; tenure is
+  capped at 72; the test set was not used for the survival models.
+
+## 21. Customer-specific lifetime value and cost matrix
+- Definition: V_i = monthly charge x expected number of active months in the next 12, from the
+  out-of-fold Cox survival curve, conditional on the customer's tenure so far. A 12-month
+  horizon keeps V_i comparable with the fixed V = 777 (12 x mean monthly charge).
+- Result: mean V_i = 688.8 (range 41 to 1,425) against the fixed 777; mean expected months 10.74
+  of 12. Churners have a higher mean V_i (741) than stayers (670) because they pay higher bills.
+- Cost rerun (offer 78, success rate 30%, out-of-fold XGBoost probabilities, cost per customer):
+  fixed V reproduces the earlier numbers (flag nobody 206.18; 188.11 at threshold 0.36).
+  With V_i: flag nobody 196.74; best single threshold 0.41 gives 179.60 (8.7% saving); the
+  customer-specific rule (flag if probability > offer / (success rate x V_i)) gives 178.32
+  (9.4% saving) while flagging fewer customers (1,673 against 1,897 under fixed V).
+- Reading: the customer-specific rule skips low-value customers for whom the 78 offer is not
+  worth it and flags high-value customers at lower risk. The rule has no tuned parameter, while
+  the single threshold was tuned on the same data. The gain over the best single threshold is
+  small (about 1.3 per customer, 0.7 percentage points).
+- Limitations: V_i is an estimate and is revenue, not profit; the offer cost and success rate
+  are assumptions; results are out-of-fold on training data.
+
+## 22. Streamlit demo (app/streamlit_app.py)
+- Purpose: a working demonstration (guide's request; presented at the viva). A user picks one
+  of eight example customers or edits any value, and sees the churn probability against the
+  cost-optimal threshold, the SHAP explanation, the assigned segment, a recommended action and
+  DiCE counterfactual options.
+- Build: app/build_app_artifacts.py refits the unweighted XGBoost model on the training data,
+  rebuilds the SHAP-based K-Means segments (reproduced exactly: ARI 1.0 against the saved
+  segments) and, for Telco, fits the Cox model used for customer value. The saved models are not
+  committed and are rebuilt with one command.
+- Recommended action: offer if the churn probability exceeds the break-even offer / (success rate
+  x V). For Telco V is customer-specific (survival-based); for the bank it is the assumed
+  V = 1,000, so break-even is fixed at 0.33 because the bank data has no tenure-to-churn timeline
+  usable for survival analysis. The segment actions are hypotheses to be tested in a pilot.
+- Counterfactual filter: DiCE's random search sometimes proposes changes that remove something
+  (becoming inactive, dropping the credit card, switching off an add-on service) because the
+  model's risk falls. These are hidden in the demo as unrealistic retention actions; eight options
+  are generated and the first three realistic ones are shown.
+- Limitations: segment assignment for a new customer uses SHAP values from the model fitted on
+  all training data, whereas the segments were built from out-of-fold SHAP values; the offer cost
+  and success rate are assumptions; counterfactuals show what the model responds to, not what a
+  real customer will do.
